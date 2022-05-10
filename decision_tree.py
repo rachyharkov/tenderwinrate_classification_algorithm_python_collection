@@ -5,9 +5,8 @@ from sklearn.tree import DecisionTreeClassifier # Import Decision Tree Classifie
 from sklearn.model_selection import train_test_split # Import train_test_split function
 from sklearn import metrics #Import scikit-learn metrics module for accuracy calculation
 
-col_names = ['harga', 'partner', 'competitor', 'winlose']
 # load dataset
-dataset = pd.read_csv("training_data.csv", header=None, names=col_names, sep=';')
+dataset = pd.read_csv("training_data.csv", header=None, sep=';')
 
 x = dataset.iloc[:, [1,2]].values
 y = dataset.iloc[:, -1].values
