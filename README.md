@@ -6,10 +6,10 @@ These 3 algorithm will be used to get the win rate, it still under development
 
 Planning
 
-[ x ] Upload data training
-[ x ] Bikin model training
-[ ] Bikin Form isian (sesuai property training) yang akan dipredict
-[ ] Formnya diPredict pake ML win/lose dari data training
+- [x] Upload Training data
+- [x] create training model
+- [ ] Bikin Form isian (sesuai property training) yang akan dipredict
+- [ ] Formnya diPredict pake ML win/lose dari data training
 
 
 PROJECT MOBLEJ - REKIND/01/ML-1607-10052022
