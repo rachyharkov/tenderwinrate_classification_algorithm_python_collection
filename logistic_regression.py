@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 
 dataset = pd.read_csv("training_data.csv", sep=";")
 
-x = dataset.iloc[:, [1,2]].values
+x = dataset.iloc[:, [0,2]].values
 y = dataset.iloc[:, -1].values
 
 rangeUnique = np.unique(x[:, 0])
