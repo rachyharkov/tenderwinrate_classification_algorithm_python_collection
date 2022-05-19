@@ -1,0 +1,10 @@
+Catatan:
+
+1. Urutan: Moderate - Medium - Optimis
+2. Algoritma Random forest harus output berupa 1 atau 0 (perlu dicari tau)
+3. Rancang UI
+	- Upload Excel
+	- Output Predict nya
+4. Python dijadikan API
+5. Skema webnya [Front End] - [PHP] - [Python(Flask)]
+

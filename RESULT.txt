@@ -1,0 +1,10 @@
+2 0 1
+
+Accuracy of decision tree classifier on test set: 0.91
+RESULT = LOSE (100%)
+
+Accuracy of logistic regression classifier on test set: 0.91
+RESULT = WIN (94.2298017613115 %)
+
+Accuracy of Random Forest classifier on test set: 0.69
+RESULT = WIN (100%)
