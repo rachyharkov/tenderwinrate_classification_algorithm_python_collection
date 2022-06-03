@@ -8,8 +8,8 @@ Planning
 
 - [x] Upload Training data
 - [x] create training model
-- [ ] Bikin Form isian (sesuai property training) yang akan dipredict
-- [ ] Formnya diPredict pake ML win/lose dari data training
+- [x] Bikin Form isian (sesuai property training) yang akan dipredict
+- [x] Formnya diPredict pake ML win/lose dari data training
 
 
 PROJECT MOBLEJ - REKIND/01/ML-1607-10052022
