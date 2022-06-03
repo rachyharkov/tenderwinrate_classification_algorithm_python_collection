@@ -3,11 +3,11 @@ import os
 import pandas as pd
 from flask import Flask, request, jsonify
 import matplotlib.pyplot as plt
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
-def initialization(value, filename):
+def initialization(new_x, filename):
 
     cols = ['harga', 'partner', 'competitor', 'winrate']
 
@@ -60,28 +60,26 @@ def initialization(value, filename):
     x_train = sc.fit_transform(x_train)
     x_test = sc.transform(x_test)
 
-    clf = RandomForestRegressor()
+    # n estimator adalah banyak pohon yang ingin dibuat pada hutan , nilai harus integer
+    clf = RandomForestClassifier(n_estimators=10, random_state=0)
+    
     clf.fit(x_train, y_train)
     y_predict = clf.predict(x_test)
     score = clf.score(x_test, y_test) #Accuracy of Random Forest classifier on test set
 
-    new_x_test = sc.transform(value)
+    new_x_test = sc.transform(new_x)
     # predict the result
-    new_y_prediction = clf.predict(new_x_test)
+    new_y_pred = clf.predict(new_x_test)
+    probability = clf.predict_proba(new_x_test)[0][new_y_pred[0]] * 100
+    winLossEvaluation = winlosscategory[new_y_pred[0]]
 
-    assumption = 0.5
-
-    evaluation = "Lose"
-
-    # delete file from instance\sample_data by filename
-    os.remove(os.path.join(app.instance_path, 'sample_data', filename))
-
-    probability = new_y_prediction[0] * 100
-    if new_y_prediction > assumption:
-        evaluation = "Win"
     return {
         "status": "success",
+        "filename": filename,
+        "algorithm_name": "Random Forest",
         "message": "Accuracy of Random Forest Classifier on test set: " + str(score) ,
-        "evaluation": evaluation,
+        "evaluation": winLossEvaluation,
         "probability": str(probability) + "%"
     }
+
+print(initialization(np.array([[2,1,2]]), "training_data.csv"))

@@ -1,14 +1,118 @@
+import json
 import os
 from flask import Flask, request, jsonify
+from flask_cors import CORS, cross_origin
 import numpy as np
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
+    CORS(app, support_credentials=True, origins='http://localhost')
+
+    
+
+    
 
     @app.route('/')
     def index():
         return 'Hello World!'
+
+    @app.route('/test', methods=['POST'])
+    def test():
+
+        # get data from request
+        algorithm = request.form['checkboxalgorithm']
+
+        harga_val = request.form['harga']
+        partner_val = request.form['partner']
+        competitor_val = request.form['competitor']
+
+        input_file = request.files['input_file']
+        
+        listAlgorithm = ['Random Forest', 'Decision Tree', 'Logistic Regression']
+
+        # convert number to known algorithm name
+        temp = algorithm.split(',')
+        algorithm = []
+        for i in range(len(temp)):
+            algorithm.append(listAlgorithm[i - 1])
+
+        
+        # ==============file process====================
+        input_file_name = os.path.basename(input_file.filename)
+        file_extension = os.path.splitext(input_file_name)[1]
+        input_file_name = input_file_name.split('.')[0]
+        input_file_name = input_file_name + '_' + str(hash(input_file_name)) + file_extension
+
+        # save to flaskr/sample_data folder
+        input_file.save(os.path.join(app.instance_path, 'sample_data', input_file_name))
+
+        # ===========end of file process=================
+
+
+
+        if algorithm.__len__() <= 1:
+            print(algorithm)
+
+            result = {}
+
+            if algorithm[0] == "Random Forest":
+                from .algorithm.clf_random_forest import initialization
+                values = np.array([[harga_val, partner_val, competitor_val]])
+                result = initialization(values, input_file_name)
+            if algorithm[0] == "Decision Tree":
+                # run decision_tree
+                from .algorithm.clf_decision_tree import initialization
+                values = np.array([[harga_val, partner_val, competitor_val]])
+                result = initialization(values, input_file_name)
+            if algorithm[0] == "Logistic Regression":
+                from .algorithm.clf_logistic_regression import initialization
+                values = np.array([[harga_val, partner_val, competitor_val]])
+                result = initialization(values, input_file_name)
+            
+            return jsonify({
+                    "length": algorithm.__len__(),
+                    "status": "success",
+                    "x_input": [harga_val, partner_val, competitor_val],
+                    "algorithm_used": algorithm,
+                    "results": result,
+                })
+        else:
+
+            arrayResult = []
+
+            for i in range(len(algorithm)):
+                if algorithm[i] == "Random Forest":
+                    from .algorithm.clf_random_forest import initialization
+                    
+                    values = np.array([[harga_val, partner_val, competitor_val]])
+                    result = initialization(values, input_file_name)
+                    arrayResult.append(result)
+                if algorithm[i] == "Decision Tree":
+                    # run decision_tree
+                    from .algorithm.clf_decision_tree import initialization
+                    
+                    values = np.array([[harga_val, partner_val, competitor_val]])
+                    result = initialization(values, input_file_name)
+                    arrayResult.append(result)
+                    
+                if algorithm[i] == "Logistic Regression":
+                    from .algorithm.clf_logistic_regression import initialization
+                        
+                    values = np.array([[harga_val, partner_val, competitor_val]])
+                    result = initialization(values, input_file_name)
+                    arrayResult.append(result)
+                    
+
+            return jsonify({
+                    "length": algorithm.__len__(),
+                    "status": "success",
+                    "x_input": [harga_val, partner_val, competitor_val],
+                    "algorithm_used": algorithm,
+                    "results": arrayResult,
+                })
+            
+
 
     @app.route('/predict', methods=['POST'])
     def run_predict():
@@ -67,7 +171,7 @@ def create_app(test_config=None):
                         }
                         return jsonify(jsonnya)
                     if algorithm == '2':
-                        # run random forest\
+                        # run decision_tree
                         from .algorithm.clf_decision_tree import initialization
                         
                         values = np.array([[harga_val, partner_val, competitor_val]])
@@ -79,7 +183,7 @@ def create_app(test_config=None):
                         }
                         return jsonify(jsonnya)
                     if algorithm == '3':
-                        # run random forest\
+                        # run logistic_regression
                         from .algorithm.clf_logistic_regression import initialization
                         
                         values = np.array([[harga_val, partner_val, competitor_val]])
@@ -94,7 +198,7 @@ def create_app(test_config=None):
                         return jsonify(
                             {
                                 "status": "success",
-                                "message": "anu"
+                                "message": "error"
                             }
                         )
 

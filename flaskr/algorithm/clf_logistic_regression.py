@@ -78,6 +78,7 @@ def initialization(new_x, filename):
 
     return {
         "status": "success",
+        "algorithm_name": "Logistic Regression",
         "message": "Accuracy of logistic regression classifier on test set: " + str(logisticReg.score(x_test, y_test)),
         "evaluation": winlosscategory[newprediction[0]],
         "probability": str(new_prob * 100) + "%"
