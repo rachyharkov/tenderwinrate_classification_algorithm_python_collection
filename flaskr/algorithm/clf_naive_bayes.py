@@ -1,15 +1,16 @@
 from cProfile import run
 import numpy as np
 import pandas as pd
-from sklearn.tree import DecisionTreeClassifier # Import Decision Tree Classifier
-from sklearn.model_selection import train_test_split # Import train_test_split function
-import os
-# import standardScaler
+from sklearn import metrics
+from sklearn.model_selection import train_test_split
+
+import matplotlib.pyplot as plt
+
+from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import StandardScaler
-from sklearn import tree
-from flask import Flask
-from matplotlib import pyplot as plt
-import pydot
+from sklearn.metrics import confusion_matrix
+from flask import Flask, request, jsonify
+import os
 
 def preprocessing_data(X,y):
 
@@ -51,9 +52,8 @@ def preprocessing_data(X,y):
     return X,y,winlosscategory
 
 def initialization(new_X, filename):
-    cols = ['harga', 'partner', 'competitor', 'winrate']
 
-    nama_kolom = ['harga', 'partner', 'competitor']
+    cols = ['harga', 'partner', 'competitor', 'winrate']
 
     #define app
     app = Flask(__name__, instance_relative_config=True)
@@ -64,57 +64,53 @@ def initialization(new_X, filename):
     y = dataset.iloc[:, -1].values
 
     preprocessed = preprocessing_data(X,y)
-
     X = preprocessed[0]
     y = preprocessed[1]
     winlosscategory = preprocessed[2]
 
-    # split for train purpose
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0) #70% train data, 30% test data
-
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
 
     # feature scaling
     sc = StandardScaler()
     X_train = sc.fit_transform(X_train)
     X_test = sc.transform(X_test)
 
-    clf = DecisionTreeClassifier(random_state=0)
+    #Create a Gaussian Classifier
+    clf = GaussianNB()
 
-    # Train Decision Tree Classifer
-    clf = clf.fit(X_train,y_train)
+    #Train the model using the training sets
+    clf.fit(X_train, y_train)
 
     #Predict the response for test dataset
     y_pred = clf.predict(X_test)
     score = clf.score(X_test, y_test) #Accuracy of Decision Tree classifier on test set
 
-    # predict new X
     new_X_test = sc.transform(new_X)
-    # predict accuracy
+
     new_y_pred = clf.predict(new_X_test)
     winLossEvaluation = winlosscategory[new_y_pred[0]]
-
-    # probability
+    # probability of prediction for new data
     new_prob = clf.predict_proba(new_X_test)
 
-    fig = plt.figure(figsize=(25,20))
-    _ = tree.plot_tree(clf, 
-                   feature_names=nama_kolom,  
-                   class_names=winlosscategory,
-                   filled=True)
-    fig.savefig(os.path.join(app.instance_path, 'graph_data', 'decision_tree' + filename + '.png'))
-    
-    # get path of graph
-    path = 'graph_data/decision_tree' + filename + '.png'
-    
+    # visualize the confusion matrix save to file png
+    cm = confusion_matrix(y_test, y_pred)
+    plt.matshow(cm)
+    plt.title('Confusion matrix')
+    plt.colorbar()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.savefig(os.path.join(app.instance_path, 'graph_data', 'naive_bayes_confusion_matrix' + filename +'.png'))
+
+
     return {
         "status": "success",
-        "algorithm_name": "Decision Tree",
-        "message": "Accuracy of Decision Tree classifier on test set: " + str(score),
+        "algorithm_name": "Naive Bayes",
+        "message": "Accuracy of Gaussian Naive Bayes classifier on test set: " + str(score),
         "evaluation": winLossEvaluation,
         "probability": {
             "lose": str(new_prob[0][0] * 100),
             "win": str(new_prob[0][1] * 100)
-        },
+        }
     }
 
 # print(initialization(np.array([[0,1,0]]), "training_data.csv"))

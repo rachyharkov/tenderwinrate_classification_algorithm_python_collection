@@ -1,15 +1,19 @@
+from cv2 import kmeans
 import numpy as np
 import os
 import pandas as pd
 from flask import Flask, request, jsonify
 import matplotlib.pyplot as plt
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.cluster import KMeans
+from sklearn import tree
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 def initialization(new_x, filename):
 
     cols = ['harga', 'partner', 'competitor', 'winrate']
+
+    nama_kolom = ['harga', 'partner', 'competitor']
 
     #define app
     app = Flask(__name__, instance_relative_config=True)
@@ -61,7 +65,7 @@ def initialization(new_x, filename):
     x_test = sc.transform(x_test)
 
     # n estimator adalah banyak pohon yang ingin dibuat pada hutan , nilai harus integer
-    clf = RandomForestClassifier(n_estimators=10, random_state=0)
+    clf = KMeans(n_clusters=3, init='k-means++', random_state=0)
     
     clf.fit(x_train, y_train)
     y_predict = clf.predict(x_test)
@@ -70,16 +74,25 @@ def initialization(new_x, filename):
     new_x_test = sc.transform(new_x)
     # predict the result
     new_y_pred = clf.predict(new_x_test)
-    probability = clf.predict_proba(new_x_test)[0][new_y_pred[0]] * 100
-    winLossEvaluation = winlosscategory[new_y_pred[0]]
+    
+    winLossEvaluation = new_y_pred[0]
+
+    # get score on new data
+    new_score = clf.score(new_x_test, new_y_pred)
+
+    # visualize the result using matplotlib
+    plt.scatter(x_train[:, 0], x_train[:, 1], c=y_train, s=50, cmap='viridis')
+    plt.scatter(x_test[:, 0], x_test[:, 1], c=y_predict, s=50, cmap='viridis')
+    plt.show()
+
 
     return {
         "status": "success",
         "filename": filename,
-        "algorithm_name": "Random Forest",
-        "message": "Accuracy of Random Forest Classifier on test set: " + str(score) ,
+        "algorithm_name": "KMeans",
+        "message": "Accuracy of KMeans Classifier on test set: " + str(score) ,
         "evaluation": winLossEvaluation,
-        "probability": str(probability) + "%"
+        "probability": new_score
     }
 
-print(initialization(np.array([[2,1,2]]), "training_data.csv"))
+print(initialization(np.array([[0,1,0]]), "training_data.csv"))

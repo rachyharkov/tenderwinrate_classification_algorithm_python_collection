@@ -1,9 +1,15 @@
-import numpy as np
+# Compare Algorithms
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn import model_selection
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.tree import DecisionTreeClassifier
+import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
 from flask import Flask, request, jsonify
 import os
 
@@ -44,10 +50,11 @@ def preprocessing_data(X,y):
     # convert y to binary
     y = np.where(y == "Win", 1, 0)
 
+    # convert X as scale data 
+
     return X,y,winlosscategory
 
-
-def initialization(new_X, filename):
+def initialization(new_x, filename):
 
     cols = ['harga', 'partner', 'competitor', 'winrate']
 
@@ -57,47 +64,35 @@ def initialization(new_X, filename):
     dataset = pd.read_csv(os.path.join(app.instance_path, 'sample_data', filename), sep=";", header=None, names=cols)
 
     X = dataset.iloc[:, :3].values
-    y = dataset.iloc[:, -1].values
+    Y = dataset.iloc[:, -1].values
 
-    preprocessed = preprocessing_data(X,y)
-
+    preprocessed = preprocessing_data(X,Y)
     X = preprocessed[0]
-    y = preprocessed[1]
-    winlosscategory = preprocessed[2]
+    Y = preprocessed[1]
+    # prepare configuration for cross validation test harness
+    seed = 7
+    # prepare models
+    models = []
+    models.append(('LR', LogisticRegression()))
+    models.append(('CART', DecisionTreeClassifier()))
+    models.append(('NB', GaussianNB()))
+    # evaluate each model in turn
+    results = []
+    names = []
+    scoring = 'accuracy'
+    for name, model in models:
+        kfold = model_selection.KFold(n_splits=10)
+        cv_results = model_selection.cross_val_score(model, X, Y, cv=kfold, scoring=scoring)
+        results.append(cv_results)
+        names.append(name)
+        msg = "%s: %f (%f)" % (name, cv_results.mean(), cv_results.std())
+        print(msg)
+    # boxplot algorithm comparison
+    fig = plt.figure()
+    fig.suptitle('Algorithm Comparison')
+    ax = fig.add_subplot(111)
+    plt.boxplot(results)
+    ax.set_xticklabels(names)
+    plt.show()
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
-
-
-    # feature scaling
-    sc = StandardScaler()
-    X_train = sc.fit_transform(X_train)
-    X_test = sc.transform(X_test)
-
-    clf = LogisticRegression(random_state=0)
-    clf = clf.fit(X_train,y_train)
-
-    #Predict the response for test dataset
-    y_pred = clf.predict(X_test)
-    score = clf.score(X_test, y_test) #Accuracy of Decision Tree classifier on test set
-
-    # predict new X
-    new_X_test = sc.transform(new_X)
-    # predict accuracy
-    new_y_pred = clf.predict(new_X_test)
-    winLossEvaluation = winlosscategory[new_y_pred[0]]
-
-    # probability
-    new_prob = clf.predict_proba(new_X_test)
-
-    return {
-        "status": "success",
-        "algorithm_name": "Logistic Regression",
-        "message": "Accuracy of logistic regression classifier on test set: " + str(score),
-        "evaluation": winLossEvaluation,
-        "probability": {
-            "lose": str(new_prob[0][0] * 100),
-            "win": str(new_prob[0][1] * 100)
-        },
-    }
-
-# print(initialization(np.array([[0,1,0]]), "training_data.csv"))
+print(initialization(np.array([[0,1,0]]), "training_data.csv"))

@@ -18,6 +18,7 @@ def create_app(test_config=None):
         return 'Hello World!'
 
     @app.route('/test', methods=['POST'])
+    @cross_origin(supports_credentials=True)
     def test():
 
         # get data from request
@@ -29,7 +30,7 @@ def create_app(test_config=None):
 
         input_file = request.files['input_file']
         
-        listAlgorithm = ['Random Forest', 'Decision Tree', 'Logistic Regression']
+        listAlgorithm = ['Logistic Regression', 'Decision Tree', 'Naive Bayes']
 
         # convert number to known algorithm name
         temp = algorithm.split(',')
@@ -56,8 +57,8 @@ def create_app(test_config=None):
 
             result = {}
 
-            if algorithm[0] == "Random Forest":
-                from .algorithm.clf_random_forest import initialization
+            if algorithm[0] == "Logistic Regression":
+                from .algorithm.clf_logistic_regression import initialization
                 values = np.array([[harga_val, partner_val, competitor_val]])
                 result = initialization(values, input_file_name)
             if algorithm[0] == "Decision Tree":
@@ -65,8 +66,8 @@ def create_app(test_config=None):
                 from .algorithm.clf_decision_tree import initialization
                 values = np.array([[harga_val, partner_val, competitor_val]])
                 result = initialization(values, input_file_name)
-            if algorithm[0] == "Logistic Regression":
-                from .algorithm.clf_logistic_regression import initialization
+            if algorithm[0] == "Naive Bayes":
+                from .algorithm.clf_naive_bayes import initialization
                 values = np.array([[harga_val, partner_val, competitor_val]])
                 result = initialization(values, input_file_name)
             
@@ -82,8 +83,8 @@ def create_app(test_config=None):
             arrayResult = []
 
             for i in range(len(algorithm)):
-                if algorithm[i] == "Random Forest":
-                    from .algorithm.clf_random_forest import initialization
+                if algorithm[i] == "Logistic Regression":
+                    from .algorithm.clf_logistic_regression import initialization
                     
                     values = np.array([[harga_val, partner_val, competitor_val]])
                     result = initialization(values, input_file_name)
@@ -96,8 +97,8 @@ def create_app(test_config=None):
                     result = initialization(values, input_file_name)
                     arrayResult.append(result)
                     
-                if algorithm[i] == "Logistic Regression":
-                    from .algorithm.clf_logistic_regression import initialization
+                if algorithm[i] == "Naive Bayes":
+                    from .algorithm.clf_naive_bayes import initialization
                         
                     values = np.array([[harga_val, partner_val, competitor_val]])
                     result = initialization(values, input_file_name)
@@ -159,8 +160,7 @@ def create_app(test_config=None):
                     input_file.save(os.path.join(app.instance_path, 'sample_data', input_file_name))
                     
                     if algorithm == '1':
-                        # run random forest\
-                        from .algorithm.clf_random_forest import initialization
+                        from .algorithm.clf_logistic_regression import initialization
                         
                         values = np.array([[harga_val, partner_val, competitor_val]])
                         result = initialization(values, input_file_name)
@@ -171,8 +171,7 @@ def create_app(test_config=None):
                         }
                         return jsonify(jsonnya)
                     if algorithm == '2':
-                        # run decision_tree
-                        from .algorithm.clf_decision_tree import initialization
+                        from .algorithm.clf_naive_bayes import initialization
                         
                         values = np.array([[harga_val, partner_val, competitor_val]])
                         result = initialization(values, input_file_name)
@@ -183,8 +182,7 @@ def create_app(test_config=None):
                         }
                         return jsonify(jsonnya)
                     if algorithm == '3':
-                        # run logistic_regression
-                        from .algorithm.clf_logistic_regression import initialization
+                        from .algorithm.clf_decision_tree import initialization
                         
                         values = np.array([[harga_val, partner_val, competitor_val]])
                         result = initialization(values, input_file_name)
