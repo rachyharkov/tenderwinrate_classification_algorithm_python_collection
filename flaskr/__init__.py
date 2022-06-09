@@ -30,7 +30,7 @@ def create_app(test_config=None):
 
         input_file = request.files['input_file']
         
-        listAlgorithm = ['Logistic Regression', 'Decision Tree', 'Naive Bayes']
+        listAlgorithm = ['Logistic Regression', 'Decision Tree', 'Naive Bayes', 'Random Forest']
 
         # convert number to known algorithm name
         temp = algorithm.split(',')
@@ -62,12 +62,15 @@ def create_app(test_config=None):
                 values = np.array([[harga_val, partner_val, competitor_val]])
                 result = initialization(values, input_file_name)
             if algorithm[0] == "Decision Tree":
-                # run decision_tree
                 from .algorithm.clf_decision_tree import initialization
                 values = np.array([[harga_val, partner_val, competitor_val]])
                 result = initialization(values, input_file_name)
             if algorithm[0] == "Naive Bayes":
                 from .algorithm.clf_naive_bayes import initialization
+                values = np.array([[harga_val, partner_val, competitor_val]])
+                result = initialization(values, input_file_name)
+            if algorithm[0] == "Random Forest":
+                from .algorithm.clf_random_forest import initialization
                 values = np.array([[harga_val, partner_val, competitor_val]])
                 result = initialization(values, input_file_name)
             
@@ -85,21 +88,21 @@ def create_app(test_config=None):
             for i in range(len(algorithm)):
                 if algorithm[i] == "Logistic Regression":
                     from .algorithm.clf_logistic_regression import initialization
-                    
                     values = np.array([[harga_val, partner_val, competitor_val]])
                     result = initialization(values, input_file_name)
                     arrayResult.append(result)
                 if algorithm[i] == "Decision Tree":
-                    # run decision_tree
                     from .algorithm.clf_decision_tree import initialization
-                    
                     values = np.array([[harga_val, partner_val, competitor_val]])
                     result = initialization(values, input_file_name)
                     arrayResult.append(result)
-                    
                 if algorithm[i] == "Naive Bayes":
-                    from .algorithm.clf_naive_bayes import initialization
-                        
+                    from .algorithm.clf_naive_bayes import initialization                        
+                    values = np.array([[harga_val, partner_val, competitor_val]])
+                    result = initialization(values, input_file_name)
+                    arrayResult.append(result)
+                if algorithm[0] == "Random Forest":
+                    from .algorithm.clf_random_forest import initialization
                     values = np.array([[harga_val, partner_val, competitor_val]])
                     result = initialization(values, input_file_name)
                     arrayResult.append(result)
