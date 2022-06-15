@@ -4,12 +4,12 @@ import pandas as pd
 from sklearn.tree import DecisionTreeClassifier # Import Decision Tree Classifier
 from sklearn.model_selection import train_test_split # Import train_test_split function
 import os
+
 # import standardScaler
 from sklearn.preprocessing import StandardScaler
 from sklearn import tree
 from flask import Flask
 from matplotlib import pyplot as plt
-import pydot
 
 def preprocessing_data(X,y):
 
@@ -85,36 +85,66 @@ def initialization(new_X, filename):
 
     #Predict the response for test dataset
     y_pred = clf.predict(X_test)
-    score = clf.score(X_test, y_test) #Accuracy of Decision Tree classifier on test set
-
+    test_data_score = clf.score(X_test, y_test)
+    train_data_score = clf.score(X_train, y_train)
     # predict new X
     new_X_test = sc.transform(new_X)
     # predict accuracy
     new_y_pred = clf.predict(new_X_test)
     winLossEvaluation = winlosscategory[new_y_pred[0]]
 
+    from sklearn.metrics import (precision_recall_curve,PrecisionRecallDisplay)
+    from sklearn.metrics import f1_score, precision_score, recall_score 
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    from sklearn.metrics import confusion_matrix
+
+    figCM = plt.figure(figsize = (10, 8))
+    _ = sns.heatmap(confusion_matrix(y_test,y_pred), annot = True)
+    figCM.savefig(os.path.join(app.instance_path, 'graph_data', 'decision_tree_CM' + filename + '.png'))
+
+
     # probability
     new_prob = clf.predict_proba(new_X_test)
 
-    fig = plt.figure(figsize=(25,20))
+    figTree = plt.figure(figsize=(25,20))
     _ = tree.plot_tree(clf, 
                    feature_names=nama_kolom,  
                    class_names=winlosscategory,
                    filled=True)
-    fig.savefig(os.path.join(app.instance_path, 'graph_data', 'decision_tree' + filename + '.png'))
+    figTree.savefig(os.path.join(app.instance_path, 'graph_data', 'decision_tree' + filename + '.png'))
     
     # get path of graph
-    path = 'graph_data/decision_tree' + filename + '.png'
+    pathcm = 'http://localhost:5000/graph/?name=decision_tree_CM' + filename + '.png'
+    pathtree = 'http://localhost:5000/graph/?name=decision_tree' + filename + '.png'
     
     return {
         "status": "success",
         "algorithm_name": "Decision Tree",
-        "message": "Accuracy of Decision Tree classifier on test set: " + str(score),
         "evaluation": winLossEvaluation,
         "probability": {
             "lose": str(new_prob[0][0] * 100),
             "win": str(new_prob[0][1] * 100)
         },
+        "graph": [pathtree, pathcm],
+        "accuracy": {
+            "test": str(test_data_score),
+            "train": str(train_data_score),
+            "new": str(clf.score(new_X_test, new_y_pred))
+        },
+        "precision": {
+            "test": str(precision_score(y_test, y_pred)),
+            "new": str(precision_score(new_y_pred, new_y_pred))
+        },
+        "recall": {
+            "test": str(recall_score(y_test, y_pred)),
+            "new": str(recall_score(new_y_pred, new_y_pred))
+        },
+        "f1_score": {
+            "test": str(f1_score(y_test, y_pred)),
+            "new": str(f1_score(new_y_pred, new_y_pred))
+        }
     }
 
 # print(initialization(np.array([[0,1,0]]), "training_data.csv"))

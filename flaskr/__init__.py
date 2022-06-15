@@ -1,6 +1,6 @@
 import json
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS, cross_origin
 import numpy as np
 
@@ -17,6 +17,15 @@ def create_app(test_config=None):
     def index():
         return 'Hello World!'
 
+    @app.route('/graph/', methods=['GET'])
+    def graph():
+        # get first parameter
+        param1 = request.args.get('name')
+        
+        # return send images from graph_data folder
+        return send_file(os.path.join(app.instance_path, 'graph_data', param1), mimetype='image/png')
+
+
     @app.route('/test', methods=['POST'])
     @cross_origin(supports_credentials=True)
     def test():
@@ -32,12 +41,15 @@ def create_app(test_config=None):
         
         listAlgorithm = ['Logistic Regression', 'Decision Tree', 'Naive Bayes', 'Random Forest']
 
+        print(algorithm)
+
         # convert number to known algorithm name
         temp = algorithm.split(',')
         algorithm = []
         for i in range(len(temp)):
-            algorithm.append(listAlgorithm[i - 1])
-
+            algorithm.append(listAlgorithm[i + 1])
+        
+        print(algorithm)
         
         # ==============file process====================
         input_file_name = os.path.basename(input_file.filename)
@@ -53,7 +65,6 @@ def create_app(test_config=None):
 
 
         if algorithm.__len__() <= 1:
-            print(algorithm)
 
             result = {}
 

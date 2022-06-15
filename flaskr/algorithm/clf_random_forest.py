@@ -79,7 +79,8 @@ def initialization(new_x, filename):
     
     clf.fit(X_train, y_train)
     y_predict = clf.predict(X_test)
-    score = clf.score(X_test, y_test) #Accuracy of Random Forest classifier on test set
+    test_data_score = clf.score(X_test, y_test)
+    train_data_score = clf.score(X_train, y_train)
 
     new_X_test = sc.transform(new_x)
     # predict the result
@@ -91,7 +92,7 @@ def initialization(new_x, filename):
         "status": "success",
         "filename": filename,
         "algorithm_name": "Random Forest",
-        "message": "Accuracy of Random Forest Classifier on test set: " + str(score) ,
+        "message": "Accuracy on test set: " + str(test_data_score) + "\n Accuracy on train set: " + str(train_data_score),
         "evaluation": winLossEvaluation,
         "probability": {
             "lose": str(new_prob[0][0] * 100),

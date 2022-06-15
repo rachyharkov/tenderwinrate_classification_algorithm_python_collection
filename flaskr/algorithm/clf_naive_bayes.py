@@ -83,7 +83,8 @@ def initialization(new_X, filename):
 
     #Predict the response for test dataset
     y_pred = clf.predict(X_test)
-    score = clf.score(X_test, y_test) #Accuracy of Decision Tree classifier on test set
+    test_data_score = clf.score(X_test, y_test)
+    train_data_score = clf.score(X_train, y_train)
 
     new_X_test = sc.transform(new_X)
 
@@ -105,7 +106,7 @@ def initialization(new_X, filename):
     return {
         "status": "success",
         "algorithm_name": "Naive Bayes",
-        "message": "Accuracy of Gaussian Naive Bayes classifier on test set: " + str(score),
+        "message": "Accuracy on test set: " + str(test_data_score) + "\n Accuracy on train set: " + str(train_data_score),
         "evaluation": winLossEvaluation,
         "probability": {
             "lose": str(new_prob[0][0] * 100),
