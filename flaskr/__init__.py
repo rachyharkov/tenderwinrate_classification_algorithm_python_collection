@@ -47,8 +47,7 @@ def create_app(test_config=None):
         temp = algorithm.split(',')
         algorithm = []
         for i in range(len(temp)):
-            algorithm.append(listAlgorithm[i + 1])
-        
+            algorithm.append(listAlgorithm[int(temp[i])])
         print(algorithm)
         
         # ==============file process====================
@@ -112,7 +111,7 @@ def create_app(test_config=None):
                     values = np.array([[harga_val, partner_val, competitor_val]])
                     result = initialization(values, input_file_name)
                     arrayResult.append(result)
-                if algorithm[0] == "Random Forest":
+                if algorithm[i] == "Random Forest":
                     from .algorithm.clf_random_forest import initialization
                     values = np.array([[harga_val, partner_val, competitor_val]])
                     result = initialization(values, input_file_name)

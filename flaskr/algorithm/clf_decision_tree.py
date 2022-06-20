@@ -9,7 +9,6 @@ import os
 from sklearn.preprocessing import StandardScaler
 from sklearn import tree
 from flask import Flask
-from matplotlib import pyplot as plt
 
 def preprocessing_data(X,y):
 
@@ -93,9 +92,7 @@ def initialization(new_X, filename):
     new_y_pred = clf.predict(new_X_test)
     winLossEvaluation = winlosscategory[new_y_pred[0]]
 
-    from sklearn.metrics import (precision_recall_curve,PrecisionRecallDisplay)
     from sklearn.metrics import f1_score, precision_score, recall_score 
-    import matplotlib.pyplot as plt
     import seaborn as sns
     import matplotlib.pyplot as plt
     from sklearn.metrics import confusion_matrix
@@ -130,20 +127,16 @@ def initialization(new_X, filename):
         "graph": [pathtree, pathcm],
         "accuracy": {
             "test": str(test_data_score),
-            "train": str(train_data_score),
-            "new": str(clf.score(new_X_test, new_y_pred))
+            "train": str(train_data_score)
         },
         "precision": {
-            "test": str(precision_score(y_test, y_pred)),
-            "new": str(precision_score(new_y_pred, new_y_pred))
+            "test": str(precision_score(y_test, y_pred))
         },
         "recall": {
-            "test": str(recall_score(y_test, y_pred)),
-            "new": str(recall_score(new_y_pred, new_y_pred))
+            "test": str(recall_score(y_test, y_pred))
         },
         "f1_score": {
-            "test": str(f1_score(y_test, y_pred)),
-            "new": str(f1_score(new_y_pred, new_y_pred))
+            "test": str(f1_score(y_test, y_pred))
         }
     }
 

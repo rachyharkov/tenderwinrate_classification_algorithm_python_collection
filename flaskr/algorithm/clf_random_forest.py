@@ -7,6 +7,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn import tree
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn import tree
 
 def preprocessing_data(X,y):
 
@@ -78,7 +79,7 @@ def initialization(new_x, filename):
     clf = RandomForestClassifier(n_estimators=10, random_state=0)
     
     clf.fit(X_train, y_train)
-    y_predict = clf.predict(X_test)
+    y_pred = clf.predict(X_test)
     test_data_score = clf.score(X_test, y_test)
     train_data_score = clf.score(X_train, y_train)
 
@@ -88,16 +89,52 @@ def initialization(new_x, filename):
     new_prob = clf.predict_proba(new_X_test)
     winLossEvaluation = winlosscategory[new_y_pred[0]]
 
+    from sklearn.metrics import f1_score, precision_score, recall_score 
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    from sklearn.metrics import confusion_matrix
+
+    figCM = plt.figure(figsize = (10, 8))
+    _ = sns.heatmap(confusion_matrix(y_test,y_pred), annot = True)
+    figCM.savefig(os.path.join(app.instance_path, 'graph_data', 'rm_CM' + filename + '.png'))
+
+
+    # probability
+    new_prob = clf.predict_proba(new_X_test)
+
+    # figTree = plt.figure(figsize=(25,20))
+    # _ = tree.plot_tree(clf, 
+    #                feature_names=nama_kolom,  
+    #                class_names=winlosscategory,
+    #                filled=True)
+    # figTree.savefig(os.path.join(app.instance_path, 'graph_data', 'rm' + filename + '.png'))
+
+    
+
+    # get path of graph
+    pathcm = 'http://localhost:5000/graph/?name=rm_CM' + filename + '.png'
+    pathtree = 'http://localhost:5000/graph/?name=na'
+    
     return {
         "status": "success",
-        "filename": filename,
         "algorithm_name": "Random Forest",
-        "message": "Accuracy on test set: " + str(test_data_score) + "\n Accuracy on train set: " + str(train_data_score),
         "evaluation": winLossEvaluation,
         "probability": {
             "lose": str(new_prob[0][0] * 100),
             "win": str(new_prob[0][1] * 100)
+        },
+        "graph": [pathtree, pathcm],
+        "accuracy": {
+            "test": str(test_data_score),
+            "train": str(train_data_score)
+        },
+        "precision": {
+            "test": str(precision_score(y_test, y_pred))
+        },
+        "recall": {
+            "test": str(recall_score(y_test, y_pred))
+        },
+        "f1_score": {
+            "test": str(f1_score(y_test, y_pred))
         }
     }
-
-print(initialization(np.array([[0,1,0]]), "training_data.csv"))
