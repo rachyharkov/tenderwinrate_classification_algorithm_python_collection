@@ -1,53 +1,14 @@
-from cProfile import run
 import numpy as np
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier # Import Decision Tree Classifier
 from sklearn.model_selection import train_test_split # Import train_test_split function
+from ..preprocessing import preprocessing_data
 import os
 
 # import standardScaler
 from sklearn.preprocessing import StandardScaler
 from sklearn import tree
 from flask import Flask
-
-def preprocessing_data(X,y):
-
-    for i in range(len(X)):
-        for j in range(len(X[i])):
-            # trim space
-            X[i][j] = X[i][j].strip().replace(" ", "")
-            X[i][j] = X[i][j].lower()
-
-    winlosscategory = np.unique(y)
-    # get the unique values of categorical data
-    rangeUnique = np.unique(X)
-
-    newRangeUnique = []
-    # reposition rangeUnique, move to index 0 if value is Optimis, index 1 if values is medium, index 2 if value is moderate
-    for i in range(len(rangeUnique)):
-
-        if rangeUnique[i] == "moderate":
-            newRangeUnique.insert(0, rangeUnique[i])
-        if rangeUnique[i] == "medium":
-            newRangeUnique.insert(1, rangeUnique[i])
-        if rangeUnique[i] == "optimis":
-            newRangeUnique.insert(2, rangeUnique[i])
-
-
-
-    print(newRangeUnique)
-    # then change x based on the unique values
-    for i in range(len(X)):
-        for j in range(len(X[i])):
-            # detect if the value is in the range of the unique values
-            if X[i][j] in newRangeUnique:
-                X[i][j] = newRangeUnique.index(X[i][j])
-
-
-    # convert y to binary
-    y = np.where(y == "Win", 1, 0)
-
-    return X,y,winlosscategory
 
 def initialization(new_X, filename):
     cols = ['harga', 'partner', 'competitor', 'winrate']
@@ -62,12 +23,16 @@ def initialization(new_X, filename):
     X = dataset.iloc[:, :3].values
     y = dataset.iloc[:, -1].values
 
+    print(X)
+
     preprocessed = preprocessing_data(X,y)
+
 
     X = preprocessed[0]
     y = preprocessed[1]
     winlosscategory = preprocessed[2]
 
+    print(X)
     # split for train purpose
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0) #70% train data, 30% test data
 
@@ -97,9 +62,20 @@ def initialization(new_X, filename):
     import matplotlib.pyplot as plt
     from sklearn.metrics import confusion_matrix
 
-    figCM = plt.figure(figsize = (10, 8))
-    _ = sns.heatmap(confusion_matrix(y_test,y_pred), annot = True)
-    figCM.savefig(os.path.join(app.instance_path, 'graph_data', 'decision_tree_CM' + filename + '.png'))
+    cnf_matrix = confusion_matrix(y_test, y_pred)
+    labels = [0, 1]
+    fig, ax = plt.subplots()
+    tick_marks = np.arange(len(labels))
+    plt.xticks(tick_marks, labels)
+    plt.yticks(tick_marks, labels)
+    # create heatmap
+    _ = sns.heatmap(cnf_matrix, annot = True)
+    ax.xaxis.set_label_position("top")
+    plt.title('Confusion matrix', y=1.1)
+    plt.ylabel('Data Asli')
+    plt.xlabel('Prediksi')
+
+    fig.savefig(os.path.join(app.instance_path, 'graph_data', 'dtCART_CM' + filename + '.png'))
 
 
     # probability
@@ -110,11 +86,11 @@ def initialization(new_X, filename):
                    feature_names=nama_kolom,  
                    class_names=winlosscategory,
                    filled=True)
-    figTree.savefig(os.path.join(app.instance_path, 'graph_data', 'decision_tree' + filename + '.png'))
+    figTree.savefig(os.path.join(app.instance_path, 'graph_data', 'dtCART_tree' + filename + '.png'))
     
     # get path of graph
-    pathcm = 'http://localhost:5000/graph/?name=decision_tree_CM' + filename + '.png'
-    pathtree = 'http://localhost:5000/graph/?name=decision_tree' + filename + '.png'
+    pathcm = 'http://localhost:5000/graph/?name=dtCART_CM' + filename + '.png'
+    pathtree = 'http://localhost:5000/graph/?name=dtCART_tree' + filename + '.png'
     
     return {
         "status": "success",
@@ -124,7 +100,16 @@ def initialization(new_X, filename):
             "lose": str(new_prob[0][0] * 100),
             "win": str(new_prob[0][1] * 100)
         },
-        "graph": [pathtree, pathcm],
+        "graph": {
+            "confusion_matrix": {
+                "picture": pathcm,
+                "detail": '<b>Berdasarkan dataset yang diupload</b> <i><b>' + str(cnf_matrix[0][0]) + '</b></i> data tender diprediksi tidak akan dimenangi dan data asli menyatakan demikian | <i><b>' + str(cnf_matrix[0][1]) + '</b></i> data diprediksi menang walaupun data asli mengatakan kalah| <i><b>' + str(cnf_matrix[1][0]) + ' data</b></i> diprediksi kalah walaupun data asli menyatakan menang | <i><b>' + str(cnf_matrix[1][1]) + '</b></i> data diprediksi menang dan data asli menyatakan demikian.'
+            },
+            "tree" : {
+                "picture": pathtree,
+                "detail": "BLABLABLA TREEEEE"
+            }
+        },
         "accuracy": {
             "test": str(test_data_score),
             "train": str(train_data_score)
@@ -133,10 +118,10 @@ def initialization(new_X, filename):
             "test": str(precision_score(y_test, y_pred))
         },
         "recall": {
-            "test": str(recall_score(y_test, y_pred))
+            "test": str(recall_score(y_test, y_pred)),
         },
         "f1_score": {
-            "test": str(f1_score(y_test, y_pred))
+            "test": str(f1_score(y_test, y_pred)),
         }
     }
 

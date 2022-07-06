@@ -1,51 +1,11 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from flask import Flask, request, jsonify
+from flask import Flask
+from ..preprocessing import preprocessing_data
 import os
-
-def preprocessing_data(X,y):
-
-    for i in range(len(X)):
-        for j in range(len(X[i])):
-            # trim space
-            X[i][j] = X[i][j].strip().replace(" ", "")
-            X[i][j] = X[i][j].lower()
-
-    winlosscategory = np.unique(y)
-    # get the unique values of categorical data
-    rangeUnique = np.unique(X)
-
-    newRangeUnique = []
-    # reposition rangeUnique, move to index 0 if value is Optimis, index 1 if values is medium, index 2 if value is moderate
-    for i in range(len(rangeUnique)):
-
-        if rangeUnique[i] == "moderate":
-            newRangeUnique.insert(0, rangeUnique[i])
-        if rangeUnique[i] == "medium":
-            newRangeUnique.insert(1, rangeUnique[i])
-        if rangeUnique[i] == "optimis":
-            newRangeUnique.insert(2, rangeUnique[i])
-
-
-
-    print(newRangeUnique)
-    # then change x based on the unique values
-    for i in range(len(X)):
-        for j in range(len(X[i])):
-            # detect if the value is in the range of the unique values
-            if X[i][j] in newRangeUnique:
-                X[i][j] = newRangeUnique.index(X[i][j])
-
-
-    # convert y to binary
-    y = np.where(y == "Win", 1, 0)
-
-    return X,y,winlosscategory
-
 
 def initialization(new_X, filename):
 
@@ -73,6 +33,7 @@ def initialization(new_X, filename):
     X_train = sc.fit_transform(X_train)
     X_test = sc.transform(X_test)
 
+    # training
     clf = LogisticRegression(random_state=0)
     clf = clf.fit(X_train,y_train)
 
@@ -93,9 +54,22 @@ def initialization(new_X, filename):
     import matplotlib.pyplot as plt
     from sklearn.metrics import confusion_matrix
 
-    figCM = plt.figure(figsize = (10, 8))
-    _ = sns.heatmap(confusion_matrix(y_test,y_pred), annot = True)
-    figCM.savefig(os.path.join(app.instance_path, 'graph_data', 'lr_CM' + filename + '.png'))
+    # print(cnf_matrix)
+
+    cnf_matrix = confusion_matrix(y_test, y_pred)
+    labels = [0, 1]
+    fig, ax = plt.subplots()
+    tick_marks = np.arange(len(labels))
+    plt.xticks(tick_marks, labels)
+    plt.yticks(tick_marks, labels)
+    # create heatmap
+    _ = sns.heatmap(cnf_matrix, annot = True)
+    ax.xaxis.set_label_position("top")
+    plt.title('Confusion matrix', y=1.1)
+    plt.ylabel('Data Asli')
+    plt.xlabel('Prediksi')
+
+    fig.savefig(os.path.join(app.instance_path, 'graph_data', 'lr_CM' + filename + '.png'))
 
 
     # probability
@@ -112,7 +86,16 @@ def initialization(new_X, filename):
             "lose": str(new_prob[0][0] * 100),
             "win": str(new_prob[0][1] * 100)
         },
-        "graph": [pathtree, pathcm],
+        "graph": {
+            "confusion_matrix": {
+                "picture": pathcm,
+                "detail": '<b>Berdasarkan dataset yang diupload</b> <i><b>' + str(cnf_matrix[0][0]) + '</b></i> data tender diprediksi tidak akan dimenangi dan data asli menyatakan demikian | <i><b>' + str(cnf_matrix[0][1]) + '</b></i> data diprediksi menang walaupun data asli mengatakan kalah| <i><b>' + str(cnf_matrix[1][0]) + ' data</b></i> diprediksi kalah walaupun data asli menyatakan menang | <i><b>' + str(cnf_matrix[1][1]) + '</b></i> data diprediksi menang dan data asli menyatakan demikian.'
+            },
+            "tree" : {
+                "picture": pathtree,
+                "detail": "BLABLABLA TREEEEE"
+            }
+        },
         "accuracy": {
             "test": str(test_data_score),
             "train": str(train_data_score)
