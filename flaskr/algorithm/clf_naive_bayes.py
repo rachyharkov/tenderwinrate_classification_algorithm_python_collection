@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-
+from sklearn.metrics import f1_score, precision_score, recall_score, confusion_matrix, classification_report
+import seaborn as sns
+import matplotlib.pyplot as plt
 from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import StandardScaler
 from flask import Flask
@@ -25,7 +27,7 @@ def initialization(new_X, filename):
     y = preprocessed[1]
     winlosscategory = preprocessed[2]
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=0)
 
     # feature scaling
     sc = StandardScaler()
@@ -48,20 +50,6 @@ def initialization(new_X, filename):
     new_y_pred = clf.predict(new_X_test)
     winLossEvaluation = winlosscategory[new_y_pred[0]]
    
-    # # visualize the confusion matrix save to file png
-    # cm = confusion_matrix(y_test, y_pred)
-    # plt.matshow(cm)
-    # plt.title('Confusion matrix')
-    # plt.colorbar()
-    # plt.ylabel('True label')
-    # plt.xlabel('Predicted label')
-    # plt.savefig(os.path.join(app.instance_path, 'graph_data', 'naive_bayes_confusion_matrix' + filename +'.png'))
-
-
-    from sklearn.metrics import f1_score, precision_score, recall_score 
-    import seaborn as sns
-    import matplotlib.pyplot as plt
-    from sklearn.metrics import confusion_matrix
 
     cnf_matrix = confusion_matrix(y_test, y_pred)
     labels = [0, 1]
@@ -115,6 +103,9 @@ def initialization(new_X, filename):
         },
         "f1_score": {
             "test": str(f1_score(y_test, y_pred)),
+        },
+        "report": {
+            "test": str(classification_report(y_test, y_pred, target_names=['lose', 'win']))
         }
     }
 

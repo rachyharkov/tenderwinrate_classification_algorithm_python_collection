@@ -3,8 +3,10 @@ import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import classification_report, f1_score, precision_score, recall_score, confusion_matrix
 from flask import Flask
 from ..preprocessing import preprocessing_data
+from ..graph_creator import generate_graph_confusion_matrix, generate_graph_curve_probability
 import os
 
 def initialization(new_X, filename):
@@ -18,66 +20,55 @@ def initialization(new_X, filename):
 
     X = dataset.iloc[:, :3].values
     y = dataset.iloc[:, -1].values
-
+    
     preprocessed = preprocessing_data(X,y)
 
     X = preprocessed[0]
     y = preprocessed[1]
     winlosscategory = preprocessed[2]
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
-
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=0)
 
     # feature scaling
     sc = StandardScaler()
     X_train = sc.fit_transform(X_train)
+
     X_test = sc.transform(X_test)
 
-    # training
-    clf = LogisticRegression(random_state=0)
+
+    clf = LogisticRegression()
     clf = clf.fit(X_train,y_train)
 
-    #Predict the response for test dataset
+    #Predict the response using test dataset
     y_pred = clf.predict(X_test)
+
+    y_pred_proba = clf.predict_proba(X_test)
+    
+
     test_data_score = clf.score(X_test, y_test)
     train_data_score = clf.score(X_train, y_train)
 
-    # predict new X
+    
+    # predict new X [0,1,0]
     new_X_test = sc.transform(new_X)
-    # predict accuracy
+
     new_y_pred = clf.predict(new_X_test)
+    new_y_pred_proba = clf.predict_proba(new_X_test)
+
     winLossEvaluation = winlosscategory[new_y_pred[0]]
+    
 
+    
+    print(new_y_pred_proba)
 
-    from sklearn.metrics import f1_score, precision_score, recall_score 
-    import seaborn as sns
-    import matplotlib.pyplot as plt
-    from sklearn.metrics import confusion_matrix
+    print(classification_report(y_test, y_pred, target_names=['Lose', 'Win']))
 
-    # print(cnf_matrix)
-
-    cnf_matrix = confusion_matrix(y_test, y_pred)
-    labels = [0, 1]
-    fig, ax = plt.subplots()
-    tick_marks = np.arange(len(labels))
-    plt.xticks(tick_marks, labels)
-    plt.yticks(tick_marks, labels)
-    # create heatmap
-    _ = sns.heatmap(cnf_matrix, annot = True)
-    ax.xaxis.set_label_position("top")
-    plt.title('Confusion matrix', y=1.1)
-    plt.ylabel('Data Asli')
-    plt.xlabel('Prediksi')
-
-    fig.savefig(os.path.join(app.instance_path, 'graph_data', 'lr_CM' + filename + '.png'))
-
+    urlcm, cmdetail = generate_graph_confusion_matrix('lr_CM' + filename + '.png',y_test, y_pred,app)
+    curveproburl = generate_graph_curve_probability(y_pred_proba, filename, app)
 
     # probability
     new_prob = clf.predict_proba(new_X_test)
 
-    pathcm = 'http://localhost:5000/graph/?name=lr_CM' + filename + '.png'
-    pathtree = 'http://localhost:5000/graph/?name=na'
-    
     return {
         "status": "success",
         "algorithm_name": "Linear Regression",
@@ -88,13 +79,17 @@ def initialization(new_X, filename):
         },
         "graph": {
             "confusion_matrix": {
-                "picture": pathcm,
-                "detail": '<b>Berdasarkan dataset yang diupload</b> <i><b>' + str(cnf_matrix[0][0]) + '</b></i> data tender diprediksi tidak akan dimenangi dan data asli menyatakan demikian | <i><b>' + str(cnf_matrix[0][1]) + '</b></i> data diprediksi menang walaupun data asli mengatakan kalah| <i><b>' + str(cnf_matrix[1][0]) + ' data</b></i> diprediksi kalah walaupun data asli menyatakan menang | <i><b>' + str(cnf_matrix[1][1]) + '</b></i> data diprediksi menang dan data asli menyatakan demikian.'
+                "picture": urlcm,
+                "detail": '<b>Berdasarkan dataset yang diupload</b> <i><b>' + str(cmdetail[0][0]) + '</b></i> data tender diprediksi tidak akan dimenangi dan data asli menyatakan demikian | <i><b>' + str(cmdetail[0][1]) + '</b></i> data diprediksi menang walaupun data asli mengatakan kalah| <i><b>' + str(cmdetail[1][0]) + ' data</b></i> diprediksi kalah walaupun data asli menyatakan menang | <i><b>' + str(cmdetail[1][1]) + '</b></i> data diprediksi menang dan data asli menyatakan demikian.'
+            },
+            "curve_probability": {
+                "picture": curveproburl,
+                "detail": 'Probability of Win and Lose'
             },
             "tree" : {
-                "picture": pathtree,
+                "picture": 'na',
                 "detail": "BLABLABLA TREEEEE"
-            }
+            },
         },
         "accuracy": {
             "test": str(test_data_score),
@@ -108,6 +103,9 @@ def initialization(new_X, filename):
         },
         "f1_score": {
             "test": str(f1_score(y_test, y_pred)),
+        },
+        "report": {
+            "test": str(classification_report(y_test, y_pred, target_names=['Lose', 'Win']))
         }
     }
 

@@ -1,13 +1,15 @@
-import numpy as np
+
 import os
 import pandas as pd
 from flask import Flask
+from sklearn.metrics import f1_score, precision_score, recall_score, confusion_matrix, classification_report 
+
+import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
-from sklearn import tree
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn import tree
 from ..preprocessing import preprocessing_data
+from ..graph_creator import generate_graph_confusion_matrix, generate_graph_tree_path, generate_graph_tree_complete
 
 def initialization(new_x, filename):
 
@@ -27,64 +29,49 @@ def initialization(new_x, filename):
 
     X = preprocessed[0]
     y = preprocessed[1]
-    winlosscategory = preprocessed[2]
+    winorlosslabel = preprocessed[2]
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=0)
 
     # feature scaling
     sc = StandardScaler()
     X_train = sc.fit_transform(X_train)
     X_test = sc.transform(X_test)
 
+    print(X_train)
+    print('-----------')
+    print(X_test)
+
     # n estimator adalah banyak pohon yang ingin dibuat pada hutan , nilai harus integer
-    clf = RandomForestClassifier(n_estimators=10, random_state=0)
+    clf = RandomForestClassifier()
     
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
+
     test_data_score = clf.score(X_test, y_test)
     train_data_score = clf.score(X_train, y_train)
 
+    print('Data sebelum di transform : ', new_x)
     new_X_test = sc.transform(new_x)
     # predict the result
     new_y_pred = clf.predict(new_X_test)
     new_prob = clf.predict_proba(new_X_test)
-    winLossEvaluation = winlosscategory[new_y_pred[0]]
+    winLossEvaluation = winorlosslabel[new_y_pred[0]]
 
-    from sklearn.metrics import f1_score, precision_score, recall_score 
-    import seaborn as sns
-    import matplotlib.pyplot as plt
-    from sklearn.metrics import confusion_matrix
+    print('Data setelah di transform : ', new_X_test)
 
-    cnf_matrix = confusion_matrix(y_test, y_pred)
-    labels = [0, 1]
-    fig, ax = plt.subplots()
-    tick_marks = np.arange(len(labels))
-    plt.xticks(tick_marks, labels)
-    plt.yticks(tick_marks, labels)
-    # create heatmap
-    _ = sns.heatmap(cnf_matrix, annot = True)
-    ax.xaxis.set_label_position("top")
-    plt.title('Confusion matrix', y=1.1)
-    plt.ylabel('Data Asli')
-    plt.xlabel('Prediksi')
+    feat_importance = clf.feature_importances_
+    print("feat importance = " + str(feat_importance))
+ 
+    plt.title('Feature Importance')
+    plt.bar(range(X_train.shape[1]), feat_importance, align='center')
+    plt.xticks(range(X_train.shape[1]), nama_kolom, rotation=90)
+    plt.tight_layout()
+    plt.show()
 
-    fig.savefig(os.path.join(app.instance_path, 'graph_data', 'rf_CM' + filename + '.png'))
-
-
-    # probability
-    new_prob = clf.predict_proba(new_X_test)
-
-    figTree, axes = plt.subplots(figsize = (25,20),)
-    _ = tree.plot_tree(clf.estimators_[0], 
-                   feature_names=nama_kolom,  
-                   class_names=winlosscategory,
-                   filled=True)
-
-    figTree.savefig(os.path.join(app.instance_path, 'graph_data', 'rf_TREE' + filename + '.png'))
-
-    # get path of graph
-    pathcm = 'http://localhost:5000/graph/?name=rf_CM' + filename + '.png'
-    pathtree = 'http://localhost:5000/graph/?name=rf_TREE' + filename + '.png'
+    urlpathtree = generate_graph_tree_path(clf.estimators_[0], nama_kolom, ['Lose', 'Win'], new_X_test, 'rf_ptree' + filename + '.png', app)
+    urlcompletetree = generate_graph_tree_complete(clf.estimators_[0], nama_kolom, ['Lose', 'Win'], 'rf_tree' + filename + '.png', app)
+    urlcm, cmdetail = generate_graph_confusion_matrix('rf_CM' + filename + '.png',y_test, y_pred,app)
     
     return {
         "status": "success",
@@ -96,12 +83,16 @@ def initialization(new_x, filename):
         },
         "graph": {
             "confusion_matrix": {
-                "picture": pathcm,
-                "detail": '<b>Berdasarkan dataset yang diupload</b> <i><b>' + str(cnf_matrix[0][0]) + '</b></i> data tender diprediksi tidak akan dimenangi dan data asli menyatakan demikian | <i><b>' + str(cnf_matrix[0][1]) + '</b></i> data diprediksi menang walaupun data asli mengatakan kalah| <i><b>' + str(cnf_matrix[1][0]) + ' data</b></i> diprediksi kalah walaupun data asli menyatakan menang | <i><b>' + str(cnf_matrix[1][1]) + '</b></i> data diprediksi menang dan data asli menyatakan demikian.'
+                "picture": urlcm,
+                "detail": '<b>Berdasarkan dataset yang diupload</b> <i><b>' + str(cmdetail[0][0]) + '</b></i> data tender diprediksi tidak akan dimenangi dan data asli menyatakan demikian | <i><b>' + str(cmdetail[0][1]) + '</b></i> data diprediksi menang walaupun data asli mengatakan kalah| <i><b>' + str(cmdetail[1][0]) + ' data</b></i> diprediksi kalah walaupun data asli menyatakan menang | <i><b>' + str(cmdetail[1][1]) + '</b></i> data diprediksi menang dan data asli menyatakan demikian.'
             },
             "tree" : {
-                "picture": pathtree,
-                "detail": "TREEEEE deteail"
+                "picture": urlcompletetree,
+                "detail": "BLABLABLA TREEEEE"
+            },
+            "treepath" : {
+                "picture": urlpathtree,
+                "detail": "BLABLABLA TREEPATH"
             }
         },
         "accuracy": {
@@ -116,5 +107,8 @@ def initialization(new_x, filename):
         },
         "f1_score": {
             "test": str(f1_score(y_test, y_pred)),
+        },
+        "report": {
+            "test": str(classification_report(y_test, y_pred, target_names=winorlosslabel)),
         }
     }
