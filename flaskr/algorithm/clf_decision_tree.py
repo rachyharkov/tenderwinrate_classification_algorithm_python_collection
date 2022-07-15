@@ -24,7 +24,9 @@ def initialization(new_X, filename):
     X = dataset.iloc[:, :3].values
     y = dataset.iloc[:, -1].values
 
-    # print(X)
+    print('Dataset :')
+    print(X)
+    print(y)
 
     preprocessed = preprocessing_data(X,y)
 
@@ -32,6 +34,10 @@ def initialization(new_X, filename):
     X = preprocessed[0]
     y = preprocessed[1]
     winorlosslabel = preprocessed[2]
+    print('--------------------------------------------')
+    print('Preprocessing Result :')
+    print(X)
+    print(y)
 
     # print(X)
     # split for train purpose
@@ -53,16 +59,21 @@ def initialization(new_X, filename):
     clf = clf.fit(X_train,y_train)
 
     #Predict the response for test dataset
+    print('Predict menggunakan data test X :')
     y_pred = clf.predict(X_test)
+    print(y_pred)
     
     test_data_score = clf.score(X_test, y_test)
     train_data_score = clf.score(X_train, y_train)
     # predict new X
+    print('Predict data X baru:')
     print('Data sebelum di transform : ', new_X)
     new_X_test = sc.transform(new_X)
     print('Data setelah di transform : ', new_X_test)
     # predict accuracy
+    
     new_y_pred = clf.predict(new_X_test)
+    print('Prediksi data X baru : ', new_y_pred)
 
     feat_importance = clf.tree_.compute_feature_importances(normalize=False)
     print("feat importance = " + str(feat_importance))
@@ -76,10 +87,15 @@ def initialization(new_X, filename):
     print('[Lose, Win]')
     print('Index terpilih : ' + str(new_y_pred[0]) + '('+ str(winLossEvaluation) +')')
 
+    print('Generating Graph...')
     urlpathtree = generate_graph_tree_path(clf, nama_kolom, ['Lose', 'Win'], new_X_test, 'dtCART_ptree' + filename + '.png', app)
     urlcompletetree = generate_graph_tree_complete(clf, nama_kolom, ['Lose', 'Win'], 'dtCART_tree' + filename + '.png', app)
     urlcm, cmdetail = generate_graph_confusion_matrix('dtCART_CM' + filename + '.png',y_test, y_pred,app)
-
+    print('Graph generated!')
+    print('URL Path Tree : ' + urlpathtree)
+    print('URL Complete Tree : ' + urlcompletetree)
+    print('URL Confusion Matrix : ' + urlcm)
+    print('--------------------------------------------')
 
     # probability
     new_prob = clf.predict_proba(new_X_test)
@@ -99,7 +115,7 @@ def initialization(new_X, filename):
         "graph": {
             "confusion_matrix": {
                 "picture": urlcm,
-                "detail": '<b>Berdasarkan dataset yang diupload</b> <i><b>' + str(cmdetail[0][0]) + '</b></i> data tender diprediksi tidak akan dimenangi dan data asli menyatakan demikian | <i><b>' + str(cmdetail[0][1]) + '</b></i> data diprediksi menang walaupun data asli mengatakan kalah| <i><b>' + str(cmdetail[1][0]) + ' data</b></i> diprediksi kalah walaupun data asli menyatakan menang | <i><b>' + str(cmdetail[1][1]) + '</b></i> data diprediksi menang dan data asli menyatakan demikian.'
+                "detail": '<b>Berdasarkan dataset yang anda upload</b>, Decision tree menghasilkan <i><b>' + str(cmdetail[0][0]) + '</b></i> data tender diprediksi tidak akan dimenangi dan data asli menyatakan demikian | <i><b>' + str(cmdetail[0][1]) + '</b></i> data diprediksi menang walaupun data asli mengatakan kalah| <i><b>' + str(cmdetail[1][0]) + ' data</b></i> diprediksi kalah walaupun data asli menyatakan menang | <i><b>' + str(cmdetail[1][1]) + '</b></i> data diprediksi menang dan data asli menyatakan demikian.'
             },
             "tree" : {
                 "picture": urlcompletetree,

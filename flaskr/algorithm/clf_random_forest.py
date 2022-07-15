@@ -63,11 +63,11 @@ def initialization(new_x, filename):
     feat_importance = clf.feature_importances_
     print("feat importance = " + str(feat_importance))
  
-    plt.title('Feature Importance')
-    plt.bar(range(X_train.shape[1]), feat_importance, align='center')
-    plt.xticks(range(X_train.shape[1]), nama_kolom, rotation=90)
-    plt.tight_layout()
-    plt.show()
+    # plt.title('Feature Importance')
+    # plt.bar(range(X_train.shape[1]), feat_importance, align='center')
+    # plt.xticks(range(X_train.shape[1]), nama_kolom, rotation=90)
+    # plt.tight_layout()
+    # plt.show()
 
     urlpathtree = generate_graph_tree_path(clf.estimators_[0], nama_kolom, ['Lose', 'Win'], new_X_test, 'rf_ptree' + filename + '.png', app)
     urlcompletetree = generate_graph_tree_complete(clf.estimators_[0], nama_kolom, ['Lose', 'Win'], 'rf_tree' + filename + '.png', app)
@@ -84,7 +84,7 @@ def initialization(new_x, filename):
         "graph": {
             "confusion_matrix": {
                 "picture": urlcm,
-                "detail": '<b>Berdasarkan dataset yang diupload</b> <i><b>' + str(cmdetail[0][0]) + '</b></i> data tender diprediksi tidak akan dimenangi dan data asli menyatakan demikian | <i><b>' + str(cmdetail[0][1]) + '</b></i> data diprediksi menang walaupun data asli mengatakan kalah| <i><b>' + str(cmdetail[1][0]) + ' data</b></i> diprediksi kalah walaupun data asli menyatakan menang | <i><b>' + str(cmdetail[1][1]) + '</b></i> data diprediksi menang dan data asli menyatakan demikian.'
+                "detail": '<b>Berdasarkan dataset yang anda upload</b>, Random Forest menghasilkan <i><b>' + str(cmdetail[0][0]) + '</b></i> data tender diprediksi tidak akan dimenangi dan data asli menyatakan demikian | <i><b>' + str(cmdetail[0][1]) + '</b></i> data diprediksi menang walaupun data asli mengatakan kalah| <i><b>' + str(cmdetail[1][0]) + ' data</b></i> diprediksi kalah walaupun data asli menyatakan menang | <i><b>' + str(cmdetail[1][1]) + '</b></i> data diprediksi menang dan data asli menyatakan demikian.'
             },
             "tree" : {
                 "picture": urlcompletetree,

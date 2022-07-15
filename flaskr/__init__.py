@@ -1,3 +1,4 @@
+from ast import Return
 import json
 import os
 from flask import Flask, request, jsonify, send_file
@@ -61,7 +62,7 @@ def create_app():
 
         input_file = request.files['input_file']
         
-        # convert number to known algorithm name
+        # # convert number to known algorithm name
         convertedSelectedAlgorithm = convertAlgorithmSelection(selectedAlgorithm)
         
         #save dataset
@@ -86,6 +87,9 @@ def create_app():
                 values = np.array([[harga_val, partner_val, competitor_val]])
                 result = initialization(values, input_file_name)
             
+            # remove file
+            os.remove(os.path.join(app.instance_path, 'sample_data', input_file_name))
+
             return jsonify({
                     "length": convertedSelectedAlgorithm.__len__(),
                     "status": "success",
@@ -119,7 +123,7 @@ def create_app():
                     result = initialization(values, input_file_name)
                     arrayResult.append(result)
                     
-
+            os.remove(os.path.join(app.instance_path, 'sample_data', input_file_name))
             return jsonify({
                     "length": convertedSelectedAlgorithm.__len__(),
                     "status": "success",
