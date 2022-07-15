@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
@@ -64,7 +63,7 @@ def initialization(new_X, filename):
     print(classification_report(y_test, y_pred, target_names=['Lose', 'Win']))
 
     urlcm, cmdetail = generate_graph_confusion_matrix('lr_CM' + filename + '.png',y_test, y_pred,app)
-    curveproburl = generate_graph_curve_probability(y_pred_proba, filename, app)
+    curveproburl = generate_graph_curve_probability(y_pred_proba, 'lr_curveprob x' + filename + '.png', app)
 
     # probability
     new_prob = clf.predict_proba(new_X_test)
@@ -80,7 +79,7 @@ def initialization(new_X, filename):
         "graph": {
             "confusion_matrix": {
                 "picture": urlcm,
-                "detail": '<b>Berdasarkan dataset yang diupload</b> <i><b>' + str(cmdetail[0][0]) + '</b></i> data tender diprediksi tidak akan dimenangi dan data asli menyatakan demikian | <i><b>' + str(cmdetail[0][1]) + '</b></i> data diprediksi menang walaupun data asli mengatakan kalah| <i><b>' + str(cmdetail[1][0]) + ' data</b></i> diprediksi kalah walaupun data asli menyatakan menang | <i><b>' + str(cmdetail[1][1]) + '</b></i> data diprediksi menang dan data asli menyatakan demikian.'
+                "detail": '<b>Berdasarkan dataset yang anda upload</b>, Logistic Regression menghasilkan <i><b>' + str(cmdetail[0][0]) + '</b></i> data tender diprediksi tidak akan dimenangi dan data asli menyatakan demikian | <i><b>' + str(cmdetail[0][1]) + '</b></i> data diprediksi menang walaupun data asli mengatakan kalah| <i><b>' + str(cmdetail[1][0]) + ' data</b></i> diprediksi kalah walaupun data asli menyatakan menang | <i><b>' + str(cmdetail[1][1]) + '</b></i> data diprediksi menang dan data asli menyatakan demikian.'
             },
             "curve_probability": {
                 "picture": curveproburl,
