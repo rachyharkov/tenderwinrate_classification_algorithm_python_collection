@@ -1,5 +1,4 @@
 from ast import Return
-import json
 import os
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS, cross_origin
@@ -28,9 +27,6 @@ def saveDataset(file, app):
     print('file saved:' + input_file_name)
     return input_file_name
 
-
-
-
 def create_app():
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
@@ -51,7 +47,7 @@ def create_app():
 
     @app.route('/predict', methods=['POST'])
     @cross_origin(supports_credentials=True)
-    def test():
+    def run_this_func():
 
         # get data from request
         selectedAlgorithm = request.form['checkboxalgorithm']
