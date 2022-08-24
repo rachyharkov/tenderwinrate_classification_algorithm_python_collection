@@ -30,14 +30,9 @@ def initialization(new_X, filename):
 
     preprocessed = preprocessing_data(X,y)
 
-
     X = preprocessed[0]
     y = preprocessed[1]
     winorlosslabel = preprocessed[2]
-    print('--------------------------------------------')
-    print('Preprocessing Result :')
-    print(X)
-    print(y)
 
     # print(X)
     # split for train purpose
@@ -49,60 +44,29 @@ def initialization(new_X, filename):
     X_train = sc.fit_transform(X_train)
     X_test = sc.transform(X_test)
 
-    print(X_train)
-    print('-----------')
-    print(X_test)
-
-    clf = DecisionTreeClassifier(max_depth=3, random_state=42)
+    clf = DecisionTreeClassifier(criterion='gini', max_depth=5)
     
     # Latih model
     clf = clf.fit(X_train,y_train)
 
-    #Predict the response for test dataset
-    print('Predict menggunakan data test X :')
     y_pred = clf.predict(X_test)
-    print(y_pred)
     
     test_data_score = clf.score(X_test, y_test)
     train_data_score = clf.score(X_train, y_train)
     # predict new X
-    print('Predict data X baru:')
-    print('Data sebelum di transform : ', new_X)
+
     new_X_test = sc.transform(new_X)
-    print('Data setelah di transform : ', new_X_test)
-    # predict accuracy
     
     new_y_pred = clf.predict(new_X_test)
-    print('Prediksi data X baru : ', new_y_pred)
-
-    feat_importance = clf.tree_.compute_feature_importances(normalize=False)
-    print("feat importance = " + str(feat_importance))
-
-    
-    tree_rules = export_text(clf, feature_names=nama_kolom)
-    print(tree_rules)
 
     winLossEvaluation = winorlosslabel[new_y_pred[0]]
 
-    print('[Lose, Win]')
-    print('Index terpilih : ' + str(new_y_pred[0]) + '('+ str(winLossEvaluation) +')')
-
-    print('Generating Graph...')
     urlpathtree = generate_graph_tree_path(clf, nama_kolom, ['Lose', 'Win'], new_X_test, 'dtCART_ptree' + filename + '.png', app)
     urlcompletetree = generate_graph_tree_complete(clf, nama_kolom, ['Lose', 'Win'], 'dtCART_tree' + filename + '.png', app)
     urlcm, cmdetail = generate_graph_confusion_matrix('dtCART_CM' + filename + '.png',y_test, y_pred,app)
-    print('Graph generated!')
-    print('URL Path Tree : ' + urlpathtree)
-    print('URL Complete Tree : ' + urlcompletetree)
-    print('URL Confusion Matrix : ' + urlcm)
-    print('--------------------------------------------')
 
     # probability
     new_prob = clf.predict_proba(new_X_test)
-
-    
-    
-    # get path of graph
 
     return {
         "status": "success",

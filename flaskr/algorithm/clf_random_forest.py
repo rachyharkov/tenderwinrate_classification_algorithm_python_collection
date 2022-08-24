@@ -38,12 +38,8 @@ def initialization(new_x, filename):
     X_train = sc.fit_transform(X_train)
     X_test = sc.transform(X_test)
 
-    print(X_train)
-    print('-----------')
-    print(X_test)
-
     # n estimator adalah banyak pohon yang ingin dibuat pada hutan , nilai harus integer
-    clf = RandomForestClassifier()
+    clf = RandomForestClassifier(criterion='entropy', max_depth=6, n_estimators=500)
     
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
@@ -51,23 +47,11 @@ def initialization(new_x, filename):
     test_data_score = clf.score(X_test, y_test)
     train_data_score = clf.score(X_train, y_train)
 
-    print('Data sebelum di transform : ', new_x)
     new_X_test = sc.transform(new_x)
     # predict the result
     new_y_pred = clf.predict(new_X_test)
     new_prob = clf.predict_proba(new_X_test)
     winLossEvaluation = winorlosslabel[new_y_pred[0]]
-
-    print('Data setelah di transform : ', new_X_test)
-
-    feat_importance = clf.feature_importances_
-    print("feat importance = " + str(feat_importance))
- 
-    # plt.title('Feature Importance')
-    # plt.bar(range(X_train.shape[1]), feat_importance, align='center')
-    # plt.xticks(range(X_train.shape[1]), nama_kolom, rotation=90)
-    # plt.tight_layout()
-    # plt.show()
 
     urlpathtree = generate_graph_tree_path(clf.estimators_[0], nama_kolom, ['Lose', 'Win'], new_X_test, 'rf_ptree' + filename + '.png', app)
     urlcompletetree = generate_graph_tree_complete(clf.estimators_[0], nama_kolom, ['Lose', 'Win'], 'rf_tree' + filename + '.png', app)

@@ -35,7 +35,7 @@ def initialization(new_X, filename):
     X_test = sc.transform(X_test)
 
 
-    clf = LogisticRegression()
+    clf = LogisticRegression(C=1, penalty='l2',solver='newton-cg')
     clf = clf.fit(X_train,y_train)
 
     #Predict the response using test dataset
@@ -56,12 +56,6 @@ def initialization(new_X, filename):
 
     winLossEvaluation = winlosscategory[new_y_pred[0]]
     
-
-    
-    print(new_y_pred_proba)
-
-    print(classification_report(y_test, y_pred, target_names=['Lose', 'Win']))
-
     urlcm, cmdetail = generate_graph_confusion_matrix('lr_CM' + filename + '.png',y_test, y_pred,app)
     curveproburl = generate_graph_curve_probability(y_pred_proba, 'lr_curveprob x' + filename + '.png', app)
 
@@ -70,7 +64,7 @@ def initialization(new_X, filename):
 
     return {
         "status": "success",
-        "algorithm_name": "Linear Regression",
+        "algorithm_name": "Logistic Regression",
         "evaluation": winLossEvaluation,
         "probability": {
             "lose": str(new_prob[0][0] * 100),
@@ -107,5 +101,3 @@ def initialization(new_X, filename):
             "test": str(classification_report(y_test, y_pred, target_names=['Lose', 'Win']))
         }
     }
-
-# print(initialization(np.array([[0,1,0]]), "training_data.csv"))

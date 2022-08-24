@@ -8,6 +8,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import StandardScaler
 from flask import Flask
 from ..preprocessing import preprocessing_data
+from ..graph_creator import generate_graph_confusion_matrix, generate_graph_tree_path, generate_graph_tree_complete
 import os
 
 def initialization(new_X, filename):
@@ -51,26 +52,10 @@ def initialization(new_X, filename):
     winLossEvaluation = winlosscategory[new_y_pred[0]]
    
 
-    cnf_matrix = confusion_matrix(y_test, y_pred)
-    labels = [0, 1]
-    fig, ax = plt.subplots()
-    tick_marks = np.arange(len(labels))
-    plt.xticks(tick_marks, labels)
-    plt.yticks(tick_marks, labels)
-    # create heatmap
-    _ = sns.heatmap(cnf_matrix, annot = True)
-    ax.xaxis.set_label_position("top")
-    plt.title('Confusion matrix', y=1.1)
-    plt.ylabel('Data Asli')
-    plt.xlabel('Prediksi')
-
-    fig.savefig(os.path.join(app.instance_path, 'graph_data', 'nb_CM' + filename + '.png'))
-
+    urlcm, cmdetail = generate_graph_confusion_matrix('nb_CM' + filename + '.png',y_test, y_pred,app)
 
     # probability
     new_prob = clf.predict_proba(new_X_test)
-
-    pathcm = 'http://localhost:5000/graph/?name=nb_CM' + filename + '.png'
     pathtree = 'http://localhost:5000/graph/?name=na'
     
     return {
@@ -83,8 +68,8 @@ def initialization(new_X, filename):
         },
         "graph": {
             "confusion_matrix": {
-                "picture": pathcm,
-                "detail": '<b>Berdasarkan dataset yang anda upload</b>, Naive Bayes menghasilkan <i><b>' + str(cnf_matrix[0][0]) + '</b></i> data tender diprediksi tidak akan dimenangi dan data asli menyatakan demikian | <i><b>' + str(cnf_matrix[0][1]) + '</b></i> data diprediksi menang walaupun data asli mengatakan kalah| <i><b>' + str(cnf_matrix[1][0]) + ' data</b></i> diprediksi kalah walaupun data asli menyatakan menang | <i><b>' + str(cnf_matrix[1][1]) + '</b></i> data diprediksi menang dan data asli menyatakan demikian.'
+                "picture": urlcm,
+                "detail": '<b>Berdasarkan dataset yang anda upload</b>, Naive Bayes menghasilkan <i><b>' + str(cmdetail[0][0]) + '</b></i> data tender diprediksi tidak akan dimenangi dan data asli menyatakan demikian | <i><b>' + str(cmdetail[0][1]) + '</b></i> data diprediksi menang walaupun data asli mengatakan kalah| <i><b>' + str(cmdetail[1][0]) + ' data</b></i> diprediksi kalah walaupun data asli menyatakan menang | <i><b>' + str(cmdetail[1][1]) + '</b></i> data diprediksi menang dan data asli menyatakan demikian.'
             },
             "tree" : {
                 "picture": pathtree,

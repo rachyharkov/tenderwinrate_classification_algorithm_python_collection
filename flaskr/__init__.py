@@ -1,4 +1,3 @@
-from ast import Return
 import os
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS, cross_origin
@@ -127,5 +126,22 @@ def create_app():
                     "algorithm_used": convertedSelectedAlgorithm,
                     "results": arrayResult,
                 })
+        
+         
+    @app.route('/predict_test', methods=['POST'])
+    @cross_origin(supports_credentials=True)
+    def run_this_func_test():
+
+        harga_val = request.form['harga']
+        partner_val = request.form['partner']
+        competitor_val = request.form['competitor']
+        
+        from .algorithm.compare import initialization
+        values = np.array([[harga_val, partner_val, competitor_val]])
+        result = initialization(values, 'training_data.csv')
+        return jsonify({
+            "status": "success",
+            "message": "Cek konsole untuk hasilnya",
+        })
 
     return app
