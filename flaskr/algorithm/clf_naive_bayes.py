@@ -5,7 +5,7 @@ from sklearn.metrics import f1_score, precision_score, recall_score, confusion_m
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.naive_bayes import GaussianNB
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from flask import Flask
 from ..preprocessing import preprocessing_data
 from ..graph_creator import generate_graph_confusion_matrix, generate_graph_tree_path, generate_graph_tree_complete
@@ -31,7 +31,7 @@ def initialization(new_X, filename):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=0)
 
     # feature scaling
-    sc = StandardScaler()
+    sc = MinMaxScaler()
     X_train = sc.fit_transform(X_train)
     X_test = sc.transform(X_test)
 

@@ -5,10 +5,7 @@ from sklearn.model_selection import train_test_split # Import train_test_split f
 from ..preprocessing import preprocessing_data
 from ..graph_creator import generate_graph_confusion_matrix, generate_graph_tree_path, generate_graph_tree_complete
 import os
-
-
-# import standardScaler
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from flask import Flask
 
 def initialization(new_X, filename):
@@ -40,7 +37,7 @@ def initialization(new_X, filename):
 
 
     # feature scaling
-    sc = StandardScaler()
+    sc = MinMaxScaler()
     X_train = sc.fit_transform(X_train)
     X_test = sc.transform(X_test)
 

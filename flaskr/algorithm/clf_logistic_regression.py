@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import classification_report, f1_score, precision_score, recall_score, confusion_matrix
 from flask import Flask
 from ..preprocessing import preprocessing_data
@@ -28,10 +28,10 @@ def initialization(new_X, filename):
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=0)
 
-    # feature scaling
-    sc = StandardScaler()
-    X_train = sc.fit_transform(X_train)
+    # feature scaling using minmaxscaler
 
+    sc = MinMaxScaler()
+    X_train = sc.fit_transform(X_train)
     X_test = sc.transform(X_test)
 
 

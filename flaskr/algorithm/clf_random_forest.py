@@ -7,7 +7,7 @@ from sklearn.metrics import f1_score, precision_score, recall_score, confusion_m
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from ..preprocessing import preprocessing_data
 from ..graph_creator import generate_graph_confusion_matrix, generate_graph_tree_path, generate_graph_tree_complete
 
@@ -34,7 +34,7 @@ def initialization(new_x, filename):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=0)
 
     # feature scaling
-    sc = StandardScaler()
+    sc = MinMaxScaler()
     X_train = sc.fit_transform(X_train)
     X_test = sc.transform(X_test)
 
