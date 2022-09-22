@@ -20,9 +20,9 @@ def preprocessing_data(X,y):
     # as said in BAB 1 > Batasan Masalah > Poin 2
     for i in range(len(rangeUnique)):
 
-        if rangeUnique[i] == "moderate":
+        if rangeUnique[i] == "low":
             newRangeUnique.insert(0, rangeUnique[i])
-        if rangeUnique[i] == "medium":
+        if rangeUnique[i] == "moderate":
             newRangeUnique.insert(1, rangeUnique[i])
         if rangeUnique[i] == "optimis":
             newRangeUnique.insert(2, rangeUnique[i])
