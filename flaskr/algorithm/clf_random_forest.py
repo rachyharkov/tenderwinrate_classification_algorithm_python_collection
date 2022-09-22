@@ -36,9 +36,6 @@ def initialization(new_x, filename):
     # feature scaling
     sc = MinMaxScaler()
     X_train = sc.fit_transform(X_train)
-
-    print(X_train)
-
     X_test = sc.transform(X_test)
 
     # n estimator adalah banyak pohon yang ingin dibuat pada hutan , nilai harus integer
