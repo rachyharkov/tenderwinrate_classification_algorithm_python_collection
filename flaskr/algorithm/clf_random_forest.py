@@ -39,7 +39,7 @@ def initialization(new_x, filename):
     X_test = sc.transform(X_test)
 
     # n estimator adalah banyak pohon yang ingin dibuat pada hutan , nilai harus integer
-    clf = RandomForestClassifier(criterion='entropy', max_depth=6, n_estimators=500)
+    clf = RandomForestClassifier(criterion='gini', n_estimators=200, random_state=42, max_depth=6, max_features='auto')
     
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
@@ -47,9 +47,20 @@ def initialization(new_x, filename):
     test_data_score = clf.score(X_test, y_test)
     train_data_score = clf.score(X_train, y_train)
 
+    print('Data baru sebelum di transform :', new_x)
     new_X_test = sc.transform(new_x)
+    print('Data baru setelah di transform :', new_X_test)
     # predict the result
     new_y_pred = clf.predict(new_X_test)
+
+    feat_importance = clf.feature_importances_
+    print('Feature Importance :' + str(feat_importance))
+
+     # plot feature importance
+    import matplotlib.pyplot as plt
+    plt.bar(['harga', 'partner','competitor'], feat_importance)
+    plt.show()  
+    
     new_prob = clf.predict_proba(new_X_test)
     winLossEvaluation = winorlosslabel[new_y_pred[0]]
 

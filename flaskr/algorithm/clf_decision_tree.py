@@ -41,21 +41,34 @@ def initialization(new_X, filename):
     X_train = sc.fit_transform(X_train)
     X_test = sc.transform(X_test)
 
-    clf = DecisionTreeClassifier(criterion='gini', max_depth=5)
+    clf = DecisionTreeClassifier(max_depth=3, random_state=42)
     
     # Latih model
     clf = clf.fit(X_train,y_train)
-
+    
     y_pred = clf.predict(X_test)
     
     test_data_score = clf.score(X_test, y_test)
     train_data_score = clf.score(X_train, y_train)
-    # predict new X
 
+
+    print('Data baru sebelum di transform :', new_X)
     new_X_test = sc.transform(new_X)
-    
+    print('Data baru setelah di transform :', new_X_test)
+    # predict the result
     new_y_pred = clf.predict(new_X_test)
 
+    feat_importance = clf.tree_.compute_feature_importances(normalize=False)
+    print('Feature Importance :' + str(feat_importance))
+
+    # plot feature importance
+    import matplotlib.pyplot as plt
+    plt.bar(['harga', 'partner','competitor'], feat_importance)
+    plt.show()    
+
+    from sklearn.tree import export_text
+    tree_rules = export_text(clf, feature_names=nama_kolom)
+    print(tree_rules)
     winLossEvaluation = winorlosslabel[new_y_pred[0]]
 
     urlpathtree = generate_graph_tree_path(clf, nama_kolom, ['Lose', 'Win'], new_X_test, 'dtCART_ptree' + filename + '.png', app)

@@ -2,6 +2,7 @@ import os
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS, cross_origin
 import numpy as np
+from .algorithm.parameter_tuner import do_parameter_tuning
 
 def convertAlgorithmSelection(data):
     # must be correctly positioned
